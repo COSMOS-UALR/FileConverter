@@ -28,7 +28,6 @@ def main():
                     for chunk in tqdm(chunks, desc=f"{fname}"): 
                         save_excel(chunk, fname.replace('.csv', '_chunk_{}'.format(c_count)))
                         c_count += 1
-                    del df 
                 else: save_excel(df, fname.replace('.csv', ''))
                 del df 
 
