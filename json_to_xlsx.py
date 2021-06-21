@@ -1,6 +1,7 @@
 from tqdm import tqdm
 import pandas as pd 
 import json
+import numpy as np
 import os
 
 
@@ -22,9 +23,17 @@ def main():
                 pbar.set_description(fname.replace('.json',''))
                 if '.json' in fname:
                     with open(f"json_files//{fname}", encoding='utf-8') as f:
-                        data = json.load(f, strict=False)
-                        save_excel(data, fname.replace('.json',''))
-                        pbar.update(1)
+                        df = json.load(f, strict=False)
+                        if len(df) > 900000: #chunking files too large
+                            num_chunks = round(len(df) / 900000)
+                            chunks = np.array_split(df, num_chunks)
+                            c_count = 1
+                            for chunk in tqdm(chunks, desc=f"{fname}"): 
+                                save_excel(chunk, fname.replace('.csv', '_chunk_{}'.format(c_count)))
+                                c_count += 1
+                            del df 
+                        else: save_excel(df, fname.replace('.csv', ''))
+                        del df 
 
     print("\n\nAll Files finished! ")
 
