@@ -21,6 +21,7 @@ def main():
     '''
 
 
+
     conn.run(debug=False)
 
 
@@ -46,14 +47,14 @@ class Connection:
     async def create_task(self, query: Query):
         results = await self.exectue(query.query, query.data)
         if len(results) > 900000: #chunking files too large
-            # df = pd.DataFrame(results)
+            df = pd.DataFrame(results)
             num_chunks = math.ceil(len(results) / 900000)
-            chunks = np.array_split(results, num_chunks)
+            chunks = np.array_split(df, num_chunks)
             c_count = 1
             for chunk in tqdm(chunks, desc=query.fname+" chunking"): 
                 self.save_xlsx(chunk, query.fname + '_chunk_{}'.format(c_count))
                 c_count += 1
-            # del df 
+            del df 
         elif results: self.save_xlsx(results, query.fname)
         else: return
 
