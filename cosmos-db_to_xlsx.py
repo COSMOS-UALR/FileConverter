@@ -4,12 +4,13 @@ import numpy as np
 import aiomysql
 import asyncio
 import pymysql
+import math
 import os
 
 def main():
     conn = Connection()
     '''
-    Copy this code for each query you want to run. Just replace fname, query, and data
+    #Copy this code for each query you want to run. Just replace fname, query, and data
 
     conn.add_task(Query(
         fname="",
@@ -18,17 +19,7 @@ def main():
     ))
     
     '''
-    conn.add_task(Query(
-        fname="ausi_dod_related_videos",
-        query="""SELECT video_id, parent_video, crawled_time 
-        FROM australian_dod.related_videos;""",
-        data=None
-    ))
-    # conn.add_task(Query(
-    #     fname="ausi_dod_videos_daily",
-    #     query="""SELECT * FROM australian_dod.videos_daily;""",
-    #     data=None
-    # ))
+
 
     conn.run(debug=False)
 
@@ -54,15 +45,15 @@ class Connection:
 
     async def create_task(self, query: Query):
         results = await self.exectue(query.query, query.data)
-        if len(results) > 1000000: #chunking files too large
-            df = pd.DataFrame(results)
-            num_chunks = round(len(results) / 1000000)
-            chunks = np.array_split(df, num_chunks)
+        if len(results) > 900000: #chunking files too large
+            # df = pd.DataFrame(results)
+            num_chunks = math.ceil(len(results) / 900000)
+            chunks = np.array_split(results, num_chunks)
             c_count = 1
             for chunk in tqdm(chunks, desc=query.fname+" chunking"): 
                 self.save_xlsx(chunk, query.fname + '_chunk_{}'.format(c_count))
                 c_count += 1
-            del df 
+            # del df 
         elif results: self.save_xlsx(results, query.fname)
         else: return
 
